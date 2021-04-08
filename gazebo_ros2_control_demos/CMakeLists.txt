@@ -11,7 +11,7 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 if(NOT WIN32)
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wall -Wextra -Wpedantic -g)
 endif()
 
 find_package(ament_cmake REQUIRED)

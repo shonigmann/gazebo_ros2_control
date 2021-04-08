@@ -5,14 +5,16 @@ controller_manager:
     effort_controllers:
       type: effort_controllers/JointGroupEffortController
 
-    joint_state_controller:
-      type: joint_state_controller/JointStateController
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
 
 effort_controllers:
   ros__parameters:
     joints:
       - slider_to_cart
-<<<<<<< HEAD
-=======
-    interface_name: position  # does an effort controller still interface off position?
->>>>>>> small changes during testing
+    command_interfaces:
+      - effort
+    state_interfaces:
+      - position
+      - velocity
+      - effort

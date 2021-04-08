@@ -38,7 +38,7 @@ def generate_launch_description():
 
     xacro_file = os.path.join(gazebo_ros2_control_demos_path,
                               'urdf',
-                              'test_cart_effort.xacro.urdf')
+                              'effort_based_velocity.urdf')
 
     doc = xacro.parse(open(xacro_file))
     xacro.process_doc(doc)
@@ -62,8 +62,8 @@ def generate_launch_description():
     )
 
     load_effort_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_start_controller', 'effort_controllers'],
-        output='screen'
+        cmd=['ros2', 'control', 'load_start_controller', 'effort_based_velocity_controller'],
+        output='screen',
     )
 
     return LaunchDescription([
