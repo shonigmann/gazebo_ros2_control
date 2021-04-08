@@ -86,7 +86,7 @@ int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
 
-  node = std::make_shared<rclcpp::Node>("open_manipulator_controller_test");
+  node = std::make_shared<rclcpp::Node>("satellite_test_node");
 
   std::cout << "node created" << std::endl;
 
@@ -96,7 +96,7 @@ int main(int argc, char * argv[])
     node->get_node_graph_interface(),
     node->get_node_logging_interface(),
     node->get_node_waitables_interface(),
-    "/joint_trajectory_controller/follow_joint_trajectory");
+    "/chase/chase_position_controller/follow_joint_trajectory");
 
   bool response =
     action_client->wait_for_action_server(std::chrono::seconds(1));
@@ -105,48 +105,37 @@ int main(int argc, char * argv[])
   }
   std::cout << "Created action server" << std::endl;
 
-  // TODO - figure out how name spaces work with ros2_control
-  std::vector<std::string> pos_joint_names = {"joint1", "joint2", "joint3", "joint4"};  // TODO 1): add joints to list here
+  std::vector<std::string> joint_names = {"x_joint", "y_joint", "z_joint", "R_joint", "P_joint", "Y_joint"};
 
   std::vector<trajectory_msgs::msg::JointTrajectoryPoint> points;
+  
   trajectory_msgs::msg::JointTrajectoryPoint point;
   point.time_from_start = rclcpp::Duration::from_seconds(0.0);  // start asap
-  point.positions.resize(pos_joint_names.size());
+  point.positions.resize(joint_names.size());
 
   trajectory_msgs::msg::JointTrajectoryPoint point2;
   point2.time_from_start = rclcpp::Duration::from_seconds(1.0);
-  point2.positions.resize(pos_joint_names.size());
+  point2.positions.resize(joint_names.size());
 
   trajectory_msgs::msg::JointTrajectoryPoint point3;
   point3.time_from_start = rclcpp::Duration::from_seconds(2.0);
-  point3.positions.resize(pos_joint_names.size());
+  point3.positions.resize(joint_names.size());
 
   trajectory_msgs::msg::JointTrajectoryPoint point4;
   point4.time_from_start = rclcpp::Duration::from_seconds(3.0);
-  point4.positions.resize(pos_joint_names.size());
+  point4.positions.resize(joint_names.size());
 
-  for(int i=0; i < (int) pos_joint_names.size(); i++){
-      point.positions[i] = 0.0;  // TODO 2): For sake of testing, could reconfigure to add position targets for each joint
+  for(int i=0; i < (int) joint_names.size(); i++){
+      point.positions[i] = 0.0; 
       point2.positions[i] = -1.0;
       point3.positions[i] = 1.0;
       point4.positions[i] = 0.0;
   }
-
-  // TODO - add targets for effort controller
-
+  
   points.push_back(point);
   points.push_back(point2);
   points.push_back(point3);
   points.push_back(point4);
-
-
-//  // ADDING FOR EFFORT CONTROL ON GRIPPER
-//  auto publisher = node->create_publisher<std_msgs::msg::Float64MultiArray>("/effort_controllers/commands", 10);
-//  std::vector<std::string> eff_joint_names = {"gripper", "gripper_sub"};
-//  commands.data.push_back(0);  // for 'gripper'
-//  commands.data.push_back(0);  // for 'gripper_sub'
-////  publisher->publish(commands);
-
 
   rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::SendGoalOptions opt;
   opt.goal_response_callback = std::bind(common_goal_response, std::placeholders::_1);
@@ -155,7 +144,7 @@ int main(int argc, char * argv[])
 
   control_msgs::action::FollowJointTrajectory_Goal goal_msg;
   goal_msg.goal_time_tolerance = rclcpp::Duration::from_seconds(1.0);
-  goal_msg.trajectory.joint_names = pos_joint_names;
+  goal_msg.trajectory.joint_names = joint_names;
   goal_msg.trajectory.points = points;
 
   auto goal_handle_future = action_client->async_send_goal(goal_msg, opt);

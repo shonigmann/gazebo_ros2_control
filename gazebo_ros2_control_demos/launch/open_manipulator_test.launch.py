@@ -49,7 +49,7 @@ def generate_launch_description():
 
     spawn_entity = Node(package='gazebo_ros', executable='spawn_entity.py',
                         arguments=['-topic', 'robot_description',
-                                   '-entity', 'omx'],  # TODO: 2) change entity INSTANCE name
+                                   '-entity', 'omx'],  # TODO - 2) change entity INSTANCE name
                                                        # (if spawning multiple robots, each -entity needs to be unique)
                         output='screen')
 

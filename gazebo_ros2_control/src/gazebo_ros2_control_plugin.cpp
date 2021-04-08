@@ -195,7 +195,7 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
     RCLCPP_ERROR(
       impl_->model_nh_->get_logger(), "No parameter file provided. Configuration might be wrong");
   }
-
+  
   // There's currently no direct way to set parameters to the plugin's node
   // So we have to parse the plugin file manually and set it to the node's context.
   auto rcl_context = impl_->model_nh_->get_node_base_interface()->get_context()->get_rcl_context();
@@ -228,6 +228,31 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
       }
     }
   }
+  /*
+  // attempting to fix gazebo model explosion issue  
+  if (_sdf->HasElement("joint")) {
+    sdf::ElementPtr robot_itr = _sdf->GetElement("joint")->GetFirstElement();
+    std::string prefix, limit_yaml_path, joint_name;
+    double max_effort;
+    while (robot_itr != sdf::ElementPtr(nullptr)) {
+      if (robot_itr->HasElement("limit")) {
+        limit_yaml_path = robot_itr->Get<std::string>("limit");
+        const YAML::Node & limit_yaml = YAML::LoadFile(limit_yaml_path)["joint_limits"];
+        for (auto it = limit_yaml.begin(); it != limit_yaml.end(); it++) {
+          joint_name = prefix + it->first.as<std::string>();
+          if (joint_name.compare(joint_name.size() - 6, joint_name.size(), "_joint") != 0) {
+            joint_name += "_joint";
+          }
+          const YAML::Node & field = it->second;
+          max_effort = field["effort"].as<double>();
+          auto joint = model_->GetJoint(joint_name);
+          joint->SetParam("fmax", 0, max_effort); // Key line
+          
+        }
+      }
+      robot_itr = robot_itr->GetNextElement();
+    }
+  }*/
 
   std::vector<const char *> argv;
   for (const auto & arg : arguments) {

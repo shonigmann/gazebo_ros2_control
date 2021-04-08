@@ -46,6 +46,13 @@ ament_target_dependencies(example_effort
   std_msgs
 )
 
+add_executable(satellite_position examples/satellite_position.cpp)
+ament_target_dependencies(satellite_position
+  rclcpp
+  rclcpp_action
+  control_msgs
+)
+
 add_executable(example_open_manipulator examples/example_open_manipulator.cpp)
 ament_target_dependencies(example_open_manipulator
   rclcpp
@@ -61,7 +68,7 @@ if(BUILD_TESTING)
 endif()
 
 ## Install
-install(TARGETS example_position example_velocity example_effort example_open_manipulator
+install(TARGETS example_position example_velocity example_effort example_open_manipulator satellite_position
   DESTINATION lib/${PROJECT_NAME}
 )
 
