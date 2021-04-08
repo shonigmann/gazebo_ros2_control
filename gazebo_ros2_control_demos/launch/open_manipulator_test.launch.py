@@ -32,12 +32,9 @@ def generate_launch_description():
                     get_package_share_directory('gazebo_ros'), 'launch'), '/gazebo.launch.py']),
              )
 
-    gazebo_ros2_control_demos_path = os.path.join(
-        get_package_share_directory('gazebo_ros2_control_demos'))
-
-    xacro_file = os.path.join(gazebo_ros2_control_demos_path,
+    xacro_file = os.path.join(get_package_share_directory('turtlebot3_manipulation_gazebo'),
                               'urdf',
-                              'test_cart_position.xacro.urdf')
+                              'turtlebot3_pi_manipulator.xacro')  # TODO: 1) change urdf
 
     doc = xacro.parse(open(xacro_file))
     xacro.process_doc(doc)
@@ -52,7 +49,8 @@ def generate_launch_description():
 
     spawn_entity = Node(package='gazebo_ros', executable='spawn_entity.py',
                         arguments=['-topic', 'robot_description',
-                                   '-entity', 'cartpole'],
+                                   '-entity', 'omx'],  # TODO: 2) change entity INSTANCE name
+                                                       # (if spawning multiple robots, each -entity needs to be unique)
                         output='screen')
 
     load_joint_state_controller = ExecuteProcess(
@@ -62,6 +60,19 @@ def generate_launch_description():
 
     load_joint_trajectory_controller = ExecuteProcess(
         cmd=['ros2', 'control', 'load_start_controller', 'joint_trajectory_controller'],
+        output='screen'
+    )
+
+    # TODO 3): if adding effort or velocity controllers, add here as above: these depend on ros2-control and
+    #  ros2_controllers
+
+    # load_velocity_controller = ExecuteProcess(
+    #     cmd=['ros2', 'control', 'load_start_controller', 'velocity_controller'],
+    #     output='screen'
+    # )
+
+    load_effort_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_start_controller', 'effort_controllers'],
         output='screen'
     )
 
@@ -75,7 +86,7 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=load_joint_state_controller,
-                on_exit=[load_joint_trajectory_controller],
+                on_exit=[load_joint_trajectory_controller, load_effort_controller],
             )
         ),
         gazebo,
