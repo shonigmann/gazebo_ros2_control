@@ -12,3 +12,7 @@ effort_controllers:
   ros__parameters:
     joints:
       - slider_to_cart
+<<<<<<< HEAD
+=======
+    interface_name: position  # does an effort controller still interface off position?
+>>>>>>> small changes during testing

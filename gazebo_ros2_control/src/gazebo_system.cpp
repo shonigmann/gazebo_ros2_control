@@ -131,6 +131,14 @@ bool GazeboSystem::initSim(
       RCLCPP_WARN_STREAM(
         this->nh_->get_logger(), "Skipping joint in the URDF named '" << joint_name <<
           "' which is not in the gazebo model.");
+          //
+      RCLCPP_WARN_STREAM(this->nh_->get_logger(), "Joints available: ");
+      const gazebo::physics::Joint_V joint_list = parent_model->GetJoints();
+      //long unsigned int n_joints = joint_list.size();
+      for (const gazebo::physics::JointPtr joint_: joint_list) {
+        RCLCPP_WARN_STREAM(this->nh_->get_logger(), joint_->GetName() << " \n");
+      }
+          //
       continue;
     }
     this->dataPtr->sim_joints_.push_back(simjoint);
