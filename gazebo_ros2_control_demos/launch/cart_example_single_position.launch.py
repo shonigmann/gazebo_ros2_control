@@ -37,7 +37,7 @@ def generate_launch_description():
 
     xacro_file = os.path.join(gazebo_ros2_control_demos_path,
                               'urdf',
-                              'test_cart_position.xacro.urdf')
+                              'test_cart_single_position.xacro.urdf')
 
     doc = xacro.parse(open(xacro_file))
     xacro.process_doc(doc)
@@ -60,8 +60,8 @@ def generate_launch_description():
         output='screen'
     )
 
-    load_joint_trajectory_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_start_controller', 'joint_trajectory_controller'],
+    load_joint_position_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_start_controller', 'position_controller'],
         output='screen'
     )
 
@@ -75,7 +75,7 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=load_joint_state_broadcaster,
-                on_exit=[load_joint_trajectory_controller],
+                on_exit=[load_joint_position_controller],
             )
         ),
         gazebo,
