@@ -316,6 +316,9 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
       "controller_manager"));
   impl_->executor_->add_node(impl_->controller_manager_);
 
+  rclcpp::Parameter use_sim_time = rclcpp::Parameter("use_sim_time", true);
+  impl_->controller_manager_->set_parameter(use_sim_time);
+
   if (!impl_->controller_manager_->has_parameter("update_rate")) {
     RCLCPP_ERROR_STREAM(
       impl_->model_nh_->get_logger(), "controller manager doesn't have an update_rate parameter");
