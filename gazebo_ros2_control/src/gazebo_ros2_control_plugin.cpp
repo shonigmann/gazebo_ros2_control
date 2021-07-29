@@ -102,6 +102,9 @@ public:
   // Thread where the executor will sping
   std::thread thread_executor_spin_;
 
+  // Flag to stop the executor thread when this plugin is exiting
+  bool stop_;
+
   // Controller manager
   std::shared_ptr<controller_manager::ControllerManager> controller_manager_;
 
@@ -122,6 +125,12 @@ GazeboRosControlPlugin::GazeboRosControlPlugin()
 
 GazeboRosControlPlugin::~GazeboRosControlPlugin()
 {
+  // Stop controller manager thread
+  impl_->stop_ = true;
+  impl_->executor_->remove_node(impl_->controller_manager_);
+  impl_->executor_->cancel();
+  impl_->thread_executor_spin_.join();
+
   // Disconnect from gazebo events
   impl_->update_connection_.reset();
 }
@@ -191,6 +200,35 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
   // So we have to parse the plugin file manually and set it to the node's context.
   auto rcl_context = impl_->model_nh_->get_node_base_interface()->get_context()->get_rcl_context();
   std::vector<std::string> arguments = {"--ros-args", "--params-file", impl_->param_file_.c_str()};
+  if (sdf->HasElement("ros")) {
+    sdf = sdf->GetElement("ros");
+
+    // Set namespace if tag is present
+    if (sdf->HasElement("namespace")) {
+      std::string ns = sdf->GetElement("namespace")->Get<std::string>();
+      // prevent exception: namespace must be absolute, it must lead with a '/'
+      if (ns.empty() || ns[0] != '/') {
+        ns = '/' + ns;
+      }
+      std::string ns_arg = std::string("__ns:=") + ns;
+      arguments.push_back(RCL_REMAP_FLAG);
+      arguments.push_back(ns_arg);
+    }
+
+    // Get list of remapping rules from SDF
+    if (sdf->HasElement("remapping")) {
+      sdf::ElementPtr argument_sdf = sdf->GetElement("remapping");
+
+      arguments.push_back(RCL_ROS_ARGS_FLAG);
+      while (argument_sdf) {
+        std::string argument = argument_sdf->Get<std::string>();
+        arguments.push_back(RCL_REMAP_FLAG);
+        arguments.push_back(argument);
+        argument_sdf = argument_sdf->GetNextElement("remapping");
+      }
+    }
+  }
+
   std::vector<const char *> argv;
   for (const auto & arg : arguments) {
     argv.push_back(reinterpret_cast<const char *>(arg.data()));
@@ -303,9 +341,10 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
         gazebo_period.seconds() << " s).");
   }
 
+  impl_->stop_ = false;
   auto spin = [this]()
     {
-      while (rclcpp::ok()) {
+      while (rclcpp::ok() && !impl_->stop_) {
         impl_->executor_->spin_once();
       }
     };
@@ -333,8 +372,11 @@ void GazeboRosControlPrivate::Update()
     last_update_sim_time_ros_ = sim_time_ros;
     controller_manager_->read();
     controller_manager_->update();
-    controller_manager_->write();
   }
+
+  // Always set commands on joints, otherwise at low control frequencies the joints tremble
+  // as they are updated at a fraction of gazebo sim time
+  controller_manager_->write();
 }
 
 // Called on world reset
