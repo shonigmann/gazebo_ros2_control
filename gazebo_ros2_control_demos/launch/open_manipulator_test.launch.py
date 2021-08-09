@@ -34,7 +34,7 @@ def generate_launch_description():
 
     xacro_file = os.path.join(get_package_share_directory('turtlebot3_manipulation_gazebo'),
                               'urdf',
-                              'turtlebot3_pi_manipulator.xacro')  # TODO: 1) change urdf
+                              'turtlebot3_pi_manipulator.xacro')
 
     doc = xacro.parse(open(xacro_file))
     xacro.process_doc(doc)

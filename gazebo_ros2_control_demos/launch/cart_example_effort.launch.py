@@ -56,13 +56,15 @@ def generate_launch_description():
                                    '-entity', 'cartpole'],
                         output='screen')
 
-    load_joint_state_broadcaster = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_start_controller', 'joint_state_broadcaster'],
+    load_joint_state_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start',
+             'joint_state_broadcaster'],
+
         output='screen'
     )
 
-    load_effort_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_start_controller', 'effort_controllers'],
+    load_joint_trajectory_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start', 'effort_controllers'],
         output='screen'
     )
 
@@ -75,8 +77,13 @@ def generate_launch_description():
         ),
         RegisterEventHandler(
             event_handler=OnProcessExit(
+<<<<<<< HEAD
                 target_action=load_joint_state_broadcaster,
                 on_exit=[load_effort_controller],
+=======
+                target_action=load_joint_state_controller,
+                on_exit=[load_joint_trajectory_controller],
+>>>>>>> 895ade63dc26f2cbecef0396d82eeaf4d1493d08
             )
         ),
         gazebo,
