@@ -16,7 +16,6 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 
-
 from launch import LaunchDescription
 from launch.actions import ExecuteProcess, IncludeLaunchDescription, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
@@ -38,7 +37,7 @@ def generate_launch_description():
 
     xacro_file = os.path.join(gazebo_ros2_control_demos_path,
                               'urdf',
-                              'test_cart_effort.xacro.urdf')
+                              'test_cart_single_position.xacro.urdf')
 
     doc = xacro.parse(open(xacro_file))
     xacro.process_doc(doc)
@@ -56,15 +55,13 @@ def generate_launch_description():
                                    '-entity', 'cartpole'],
                         output='screen')
 
-    load_joint_state_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start',
-             'joint_state_broadcaster'],
-
+    load_joint_state_broadcaster = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_start_controller', 'joint_state_broadcaster'],
         output='screen'
     )
 
-    load_joint_trajectory_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start', 'effort_controllers'],
+    load_joint_position_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_start_controller', 'position_controller'],
         output='screen'
     )
 
@@ -77,13 +74,8 @@ def generate_launch_description():
         ),
         RegisterEventHandler(
             event_handler=OnProcessExit(
-<<<<<<< HEAD
                 target_action=load_joint_state_broadcaster,
-                on_exit=[load_effort_controller],
-=======
-                target_action=load_joint_state_controller,
-                on_exit=[load_joint_trajectory_controller],
->>>>>>> 895ade63dc26f2cbecef0396d82eeaf4d1493d08
+                on_exit=[load_joint_position_controller],
             )
         ),
         gazebo,
