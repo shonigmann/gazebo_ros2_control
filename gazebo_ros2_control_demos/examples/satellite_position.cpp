@@ -114,22 +114,30 @@ int main(int argc, char * argv[])
   point.positions.resize(joint_names.size());
 
   trajectory_msgs::msg::JointTrajectoryPoint point2;
-  point2.time_from_start = rclcpp::Duration::from_seconds(1.0);
+  point2.time_from_start = rclcpp::Duration::from_seconds(3.0);
   point2.positions.resize(joint_names.size());
 
   trajectory_msgs::msg::JointTrajectoryPoint point3;
-  point3.time_from_start = rclcpp::Duration::from_seconds(2.0);
+  point3.time_from_start = rclcpp::Duration::from_seconds(6.0);
   point3.positions.resize(joint_names.size());
 
   trajectory_msgs::msg::JointTrajectoryPoint point4;
-  point4.time_from_start = rclcpp::Duration::from_seconds(3.0);
+  point4.time_from_start = rclcpp::Duration::from_seconds(9.0);
   point4.positions.resize(joint_names.size());
 
   for(int i=0; i < (int) joint_names.size(); i++){
-      point.positions[i] = 0.0; 
-      point2.positions[i] = -1.0;
-      point3.positions[i] = 1.0;
-      point4.positions[i] = 0.0;
+      if(i == 0 || i == 2){
+        point.positions[i] = 0.0; 
+        point2.positions[i] = -0.03;
+        point3.positions[i] = 0.0;
+        point4.positions[i] = 0.03;
+      }else{
+        point.positions[i] = 0.0; 
+        point2.positions[i] = -0.0;
+        point3.positions[i] = 0.0;
+        point4.positions[i] = 0.0;
+      
+      }
   }
   
   points.push_back(point);
